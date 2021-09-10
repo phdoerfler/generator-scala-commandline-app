@@ -25,7 +25,7 @@ yo scala-commandline-app
 
 ## License
 
-BSD-3-Clause © [Philipp Dörfler]()
+BSD-3-Clause © [Philipp Dörfler](https://github.com/phdoerfler)
 
 
 [npm-image]: https://badge.fury.io/js/generator-scala-commandline-app.svg
