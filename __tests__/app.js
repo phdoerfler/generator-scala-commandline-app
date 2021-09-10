@@ -5,9 +5,13 @@ const helpers = require("yeoman-test");
 
 describe("generator-scala-commandline-app:app", () => {
   beforeAll(() => {
-    return helpers
-      .run(path.join(__dirname, "../generators/app"))
-      .withPrompts({ someAnswer: true });
+    return helpers.run(path.join(__dirname, "../generators/app")).withPrompts({
+      scalaVersion: "2.13.6",
+      version: "1.0-SNAPSHOT",
+      organization: "com.example",
+      organizationName: "acme",
+      githubUser: "wayne"
+    });
   });
 
   it("creates files", () => {

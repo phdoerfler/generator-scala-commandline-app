@@ -1,4 +1,6 @@
-language: node_js
+language:
+  - node_js
+  - scala
 node_js:
   - v16
   - v14
@@ -7,3 +9,5 @@ node_js:
   - v8
   - v6
   - v4
+scala:
+  - 2.13.6
