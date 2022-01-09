@@ -1,3 +1,4 @@
+<% if (! libs.includes("scalanative")) { %>
 package <%= organization %>
 
 import better.files._
@@ -13,47 +14,61 @@ import scala.sys.process._
 import File._
 import scopt.OParser
 
-object Main extends App {
-  val terminal: Terminal = TerminalBuilder.builder()
-      .dumb(true)
-      .build()
-  val lineReader = LineReaderBuilder.builder()
-      .terminal(terminal)
-      .build()
-  
-  val builder = OParser.builder[Config]
-  val parser1 = {
-    import builder._
-    OParser.sequence(
-      programName(BuildInfo.name),
-      head(BuildInfo.name, BuildInfo.version),
-      opt[JFile]('i', "script")
-        .required()
-        .action((x, c) => c.copy(script = x.toScala))
-        .text("the script to provision with"),
-      opt[String]('a', "address")
-        .required()
-        .action((x, c) => c.copy(address = x))
-        .text("the address of the device to provision, be it IP or MAC"),
-      opt[String]('u', "user")
-        .action((x, c) => c.copy(user = x))
-        .text("the user, defaults to admin"),
-      opt[JFile]('k', "key")
-        .action((x, c) => c.copy(key = x.toScala))
-        .text("the ssh key to copy onto the device"),
-    )
-  }
+<% if (libs.includes("scalapy")) { %>
+import me.shadaj.scalapy.py
+import me.shadaj.scalapy.py.writableSeqElem
+import me.shadaj.scalapy.py.SeqConverters
+<% } %>
 
-  OParser.parse(parser1, args, Config()) match {
-    case Some(config: Config) =>
-      run(config)
-    case _ =>
-      // arguments are bad, error message will have been displayed
-  }
 
-  def run(cfg: Config) = {
-    ???
+object Main {
+  def main(args: Array[String]): Unit = {
+    // val terminal: Terminal = TerminalBuilder.builder()
+    //     .dumb(true)
+    //     .build()
+    // val lineReader = LineReaderBuilder.builder()
+    //     .terminal(terminal)
+    //     .build()
+    
+    val builder = OParser.builder[Config]
+    val parser1 = {
+      import builder._
+      OParser.sequence(
+        programName(BuildInfo.name),
+        head(BuildInfo.name, BuildInfo.version),
+        opt[JFile]('i', "script")
+          .required()
+          .action((x, c) => c.copy(script = x.toScala))
+          .text("the script to provision with"),
+        opt[String]('u', "user")
+          .action((x, c) => c.copy(user = x))
+          .text("the user, defaults to admin")
+      )
+    }
+
+    OParser.parse(parser1, args, Config()) match {
+      case Some(config: Config) =>
+        run(config)
+      case _ =>
+        // arguments are bad, error message will have been displayed
+    }
+
+    def run(cfg: Config) = {
+      println(s"Running with config $cfg")
+  <% if (libs.includes("scalapy")) { %>
+      val listLengthPython = py.Dynamic.global.len(List(1, 2, 3).toPythonProxy)
+      println(listLengthPython)
+  <% } %>
+    }
   }
 }
 
-case class Config(script: File = File("."), address: String = "", user: String = "admin", key: File = File(scala.sys.env("HOME"), ".ssh", "id_rsa.pub"))
+case class Config(script: File = File("."), user: String = "admin")
+<% } %>
+<% if (libs.includes("scalanative")) { %>
+object Main {
+  def main(args: Array[String]): Unit = {
+    println("Hello, natively!")
+  }
+}
+<% } %>

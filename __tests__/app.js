@@ -10,7 +10,10 @@ describe("generator-scala-commandline-app:app", () => {
       version: "1.0-SNAPSHOT",
       organization: "com.example",
       organizationName: "acme",
-      githubUser: "wayne"
+      githubUser: "wayne",
+      libs: ["scalapy"],
+      scalapyVersion: "0.5.0",
+      skipDoc: true
     });
   });
 

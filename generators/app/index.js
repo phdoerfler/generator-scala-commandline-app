@@ -13,12 +13,12 @@ module.exports = class extends Generator {
       )
     );
 
-    const promptsA = [
+    var prompts = [
       {
         type: "list",
         name: "scalaVersion",
         message: `What do you want to use as ${chalk.red("scalaVersion")}?`,
-        choices: ["2.13.6", "3.0.1"]
+        choices: ["2.13.6", "3.1.0"]
       },
       {
         type: "input",
@@ -46,17 +46,48 @@ module.exports = class extends Generator {
         message: `What do you want to use as ${chalk.red("githubUser")}?`,
         default: "yourusername",
         store: true
+      },
+      {
+        type: "confirm",
+        name: "skipDoc",
+        message: `Disable generation of scaladoc to speed up the build?`,
+        default: "true",
+        store: true
+      },
+      {
+        type: "checkbox",
+        name: "libs",
+        message: `Which libraries would you like to use?`,
+        default: ["specs2"],
+        choices: [
+          {
+            name: "scalapy",
+            value: "scalapy"
+          },
+          {
+            name: "Scala Native",
+            value: "scalanative"
+          },
+          {
+            name: "specs2",
+            value: "specs2"
+          },
+          {
+            name: "akka",
+            value: "akka"
+          }
+        ],
+        store: true
       }
     ];
+    this.props = await this.prompt(prompts);
 
-    this.propsA = await this.prompt(promptsA);
-
-    const promptsB = [
+    prompts = [
       {
         type: "input",
         name: "homepage",
         message: `What do you want to use as ${chalk.red("homepage")}?`,
-        default: `https://github.com/${this.propsA.githubUser}?`,
+        default: `https://github.com/${this.props.githubUser}?`,
         store: true
       },
       {
@@ -67,8 +98,20 @@ module.exports = class extends Generator {
         store: true
       }
     ];
+    this.props = { ...this.props, ...(await this.prompt(prompts)) };
 
-    this.props = { ...this.propsA, ...(await this.prompt(promptsB)) };
+    if (this.props.libs.includes("scalapy")) {
+      prompts = [
+        {
+          type: "input",
+          name: "scalapyVersion",
+          message: `Which version of ${chalk.red("scalapy")} do you want to use?`,
+          default: "0.5.1",
+          store: true
+        }
+      ];
+      this.props = { ...this.props, ...(await this.prompt(prompts)) };
+    }
 
     this.composeWith(require.resolve("generator-license"), {
       name: this.props.fullName, // (optional) Owner's name
@@ -84,12 +127,17 @@ module.exports = class extends Generator {
       version: this.props.version,
       organization: this.props.organization,
       organizationName: this.props.organizationName,
-      homepage: this.props.homepage
+      homepage: this.props.homepage,
+      libs: this.props.libs,
+      skipDoc: this.props.skipDoc,
+      scalapyVersion: this.props.scalapyVersion
     });
   }
 
   install() {
-    this.spawnCommandSync("sbt", ["update"]);
+    // Athis.spawnCommandSync("sbt", ["update"]);
+    // Athis.spawnCommandSync("sbt", ["compile"]);
+    this.spawnCommandSync("sbt", ["run --script a --address b"]);
     const script = `target/universal/stage/bin/${this.determineAppname()}`;
     this.log(
       `Run ${chalk.red("sbt stage")} and then ${chalk.red(
