@@ -74,6 +74,12 @@ object Main {
       import akka.actor.typed.scaladsl.Behaviors
       import akka.actor.typed.scaladsl.LoggerOps
       import akka.actor.typed.{ ActorRef, ActorSystem, Behavior }
+
+      val system: ActorSystem[HelloWorldMain.SayHello] =
+        ActorSystem(HelloWorldMain(), "hello")
+
+      system ! HelloWorldMain.SayHello("World")
+      system ! HelloWorldMain.SayHello("Akka")
     <% } %>
 
   }
