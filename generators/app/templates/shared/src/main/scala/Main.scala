@@ -68,7 +68,7 @@ case class Config(script: File = File("."), user: String = "admin")
 <% if (libs.includes("scalanative")) { %>
 object Main {
   def main(args: Array[String]): Unit = {
-    println("Hello, natively!")
+    println("Hello!")
   }
 }
 <% } %>

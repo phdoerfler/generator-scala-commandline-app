@@ -4,27 +4,12 @@ ThisBuild / organization     := "<%= organization %>"
 ThisBuild / organizationName := "<%= organizationName %>"
 ThisBuild / homepage := Some(url(s"<%= homepage %>"))
 
-
-ThisBuild / scalacOptions := Seq("-unchecked", "-deprecation", "-language:_", "-encoding", "UTF-8")
-
 Global / onChangedBuildSource := ReloadOnSourceChanges
 onLoad in Global ~= (_ andThen ("bloopInstall" :: _))
 
-libraryDependencies ++= Seq(
-  "org.jline" % "jline" % "3.19.0",
-  ("com.github.pathikrit" %% "better-files" % "3.9.1").cross(CrossVersion.for3Use2_13),
-  "com.github.scopt" %% "scopt" % "4.0.1"
-)
-
-enablePlugins(BuildInfoPlugin)
-enablePlugins(JavaAppPackaging)
-
-buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion)
-buildInfoPackage := organization.value
-
 <% if (skipDoc) { %>
 // disable scaladoc to speed up the build
-mappings in (Compile, packageDoc) := Seq()
+Compile / packageDoc / mappings := Seq()
 <% } %>
 
 <% if (libs.includes("scalapy")) { %>
@@ -54,8 +39,46 @@ javaOptions += s"-Djna.library.path=$pythonLibsDir"
 <% } %>
 
 <% if (libs.includes("scalanative")) { %>
-// Set to false or remove if you want to show stubs as linking errors
-nativeLinkStubs := true
 
-enablePlugins(ScalaNativePlugin)
 <% } %>
+
+// If you are using Scala.js 0.6.x, you need the following import:
+//import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
+
+lazy val root =
+  // select supported platforms
+  crossProject(JSPlatform, JVMPlatform, NativePlatform)
+    .crossType(CrossType.Full)
+    .in(file("."))
+    .settings(shared)
+    .enablePlugins(BuildInfoPlugin)
+    .enablePlugins(JavaAppPackaging)
+    .jsSettings(/* ... */) // defined in sbt-scalajs-crossproject
+    .jvmSettings(
+      libraryDependencies ++= Seq(
+        <% if (libs.includes("scalapy")) { %>
+        "me.shadaj" %% "scalapy-core" % "<%= scalapyVersion %>",
+        <% } %>
+        "org.jline" % "jline" % "3.19.0",
+        ("com.github.pathikrit" %% "better-files" % "3.9.1").cross(CrossVersion.for3Use2_13)
+      ),
+      scalacOptions := Seq("-unchecked", "-deprecation", "-language:_", "-encoding", "UTF-8")
+    )
+    // configure Scala-Native settings
+    .nativeSettings(
+      // Set to false or remove if you want to show stubs as linking errors
+      nativeLinkStubs := true,
+      <% if (libs.includes("scalapy")) { %>
+      libraryDependencies += "me.shadaj" %%% "scalapy-core" % "<%= scalapyVersion %>",
+      <% } %>
+    ) // defined in sbt-scala-native
+
+
+lazy val shared = Seq(
+  buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+  buildInfoPackage := organization.value,
+
+  libraryDependencies ++= Seq(
+    ("com.github.pathikrit" %% "better-files" % "3.9.1").cross(CrossVersion.for3Use2_13),
+    "com.github.scopt" %%% "scopt" % "4.0.1")
+)

@@ -137,7 +137,7 @@ module.exports = class extends Generator {
   install() {
     // Athis.spawnCommandSync("sbt", ["update"]);
     // Athis.spawnCommandSync("sbt", ["compile"]);
-    this.spawnCommandSync("sbt", ["run --script a --address b"]);
+    this.spawnCommandSync("sbt", [";rootJVM/run --script a --address b;rootNative/run --script a --address b"]);
     const script = `target/universal/stage/bin/${this.determineAppname()}`;
     this.log(
       `Run ${chalk.red("sbt stage")} and then ${chalk.red(
