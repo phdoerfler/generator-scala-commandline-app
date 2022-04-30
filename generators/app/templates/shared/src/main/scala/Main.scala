@@ -69,6 +69,13 @@ case class Config(script: File = File("."), user: String = "admin")
 object Main {
   def main(args: Array[String]): Unit = {
     println("Hello!")
+
+    <% if (libs.includes("akka")) { %>
+      import akka.actor.typed.scaladsl.Behaviors
+      import akka.actor.typed.scaladsl.LoggerOps
+      import akka.actor.typed.{ ActorRef, ActorSystem, Behavior }
+    <% } %>
+
   }
 }
 <% } %>
